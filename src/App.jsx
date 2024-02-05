@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Pill from "./components/pill";
 
@@ -8,6 +8,8 @@ function App() {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   const [selectedUserSet, setSelectedUserSet] = useState(new Set());
+
+  const inputRef = useRef(null)
 
   // fetch('https://dummyjson.com/users/search?q=John')
 
@@ -31,6 +33,7 @@ function App() {
     setSelectedUserSet(new Set([...selectedUserSet, user.email]));
     setSearchTerm("");
     setSuggestions([]);
+    inputRef.current.focus();
   };
 
   const handleRemoveUser = (user) => {
@@ -43,6 +46,14 @@ function App() {
     updatedEmails.delete(user.email);
     setSelectedUserSet(updatedEmails);
   };
+
+  const handleKeyDown = (e) => {
+   if(e.key === "Backspace" && e.target.value ==="" && selectedUsers.length > 0) {
+        const lastUser = selectedUsers[selectedUsers.length-1];
+        handleRemoveUser(lastUser);
+        setSuggestions([]);
+   }
+  }
 
   
 
@@ -62,10 +73,12 @@ function App() {
         {/* input field with search sugestions */}
         <div>
           <input
+          ref={inputRef}
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="search for a user..."
+            onKeyDown={handleKeyDown}
           />
           {/* search suggestions */}
           <ul className="suggestionList">
